@@ -953,7 +953,9 @@ const stations = { slow:"https://listen.powerapp.com.tr/powerturkslow/mpeg/iceca
                     document.getElementById('val-temp-salon').innerText = formatTemp(ev.salon_sicaklik); 
                     document.getElementById('val-hum-salon').innerText = formatHum(ev.salon_nem); 
                 }
-            } catch (e) {}
+            } catch (e) {
+        console.error("FİREBASE BAĞLANTI HATASI: ", e); // DEDEKTİFİ BURAYA EKLEDİK!
+   	    }
         }
 
         function toggleCalendar() {
