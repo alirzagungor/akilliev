@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ev Paneli">
     <meta name="referrer" content="no-referrer">
-    <title>Ali Rıza GÜNGÖR & Seher - Akıllı Ev Paneli</title>
+    <title>Ali & Seher - Akıllı Ev Paneli</title>
     <style>
         /* 1. KÖK DEĞİŞKENLER */
         :root {
@@ -491,7 +491,7 @@
 
             <div class="bottom-split-row">
                 <div class="split-mini-card">
-                    <div class="sm-card-header">NÖBETÇİ ECZANELER</div>
+                    <div class="sm-card-header">NÖBETÇİ ECZANE</div>
                     <div class="pharmacy-content">
                         <div class="pharmacy-icon"><svg viewBox="0 0 100 100"><rect x="5" y="5" width="90" height="90" fill="#ffffff" stroke="#e74c3c" stroke-width="10" rx="10"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="65" fill="#e74c3c">E</text></svg></div>
                         <div class="pharmacy-name" id="pharmacy-name">BEKLENİYOR...</div>
@@ -946,7 +946,7 @@ const stations = { slow:"https://listen.powerapp.com.tr/powerturkslow/mpeg/iceca
 
         async function fetchHomeSensors() {
             try {
-                const ev = await (await fetch("https://omerbilal-37132-default-rtdb.europe-west1.firebasedatabase.app/veri.json")).json();
+                const ev = await (await fetch("https://argg-1f489-default-rtdb.europe-west1.firebasedatabase.app/veri.json")).json();
                 if (ev) {
                     const formatTemp = (val) => val ? String(val).replace(/[^0-9.,-]/g, '') + " °C" : "-- °C";
                     const formatHum = (val) => val ? "% " + String(val).replace(/[^0-9.,]/g, '') : "% --";
