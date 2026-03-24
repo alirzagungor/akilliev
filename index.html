@@ -945,19 +945,28 @@ const stations = { slow:"https://listen.powerapp.com.tr/powerturkslow/mpeg/iceca
         }
 
         async function fetchHomeSensors() {
-            try {
-                const ev = await (await fetch("https://argg-1f489-default-rtdb.europe-west1.firebasedatabase.app/veri.json")).json();
-                if (ev) {
-                    const formatTemp = (val) => val ? String(val).replace(/[^0-9.,-]/g, '') + " °C" : "-- °C";
-                    const formatHum = (val) => val ? "% " + String(val).replace(/[^0-9.,]/g, '') : "% --";
-                    document.getElementById('val-temp-salon').innerText = formatTemp(ev.salon_sicaklik); 
-                    document.getElementById('val-hum-salon').innerText = formatHum(ev.salon_nem); 
-                }
-            } catch (e) {
-        console.error("FİREBASE BAĞLANTI HATASI: ", e); // DEDEKTİFİ BURAYA EKLEDİK!
-   	    }
-        }
+    try {
+        const ev = await (await fetch("https://argg-1f489-default-rtdb.europe-west1.firebasedatabase.app/veri.json")).json();
+        
+        console.log("FİREBASE'DEN GELEN HAM VERİ:", ev); 
 
+        if (ev) {
+            const formatTemp = (val) => val ? String(val).replace(/[^0-9.,-]/g, '') + " °C" : "-- °C";
+            const formatHum = (val) => val ? "% " + String(val).replace(/[^0-9.,]/g, '') : "% --";
+            
+            // Firebase'deki BİREBİR aynı isimleri (Büyük S ve ı harfiyle) yazdık.
+            // Ayrıca Firebase'de nem kısmına derece (24,1), sıcaklık kısmına nem (55) girildiği için 
+            // ekrana yazdırırken yerlerini değiştirerek doğru yerlere oturttuk:
+            document.getElementById('val-temp-salon').innerText = formatTemp(ev.Salon_nem);
+            document.getElementById('val-hum-salon').innerText = formatHum(ev.Salon_sicaklik);
+        } else {
+            console.warn("UYARI: Firebase'e bağlandım ama içi boş (null) geldi!");
+        }
+    } catch (e) {
+        console.error("FİREBASE BAĞLANTI HATASI: ", e);
+    }
+}
+        
         function toggleCalendar() {
             const clockContent = document.getElementById('clock-content'), calContent = document.getElementById('calendar-content'), btn = document.getElementById('btn-calendar');
             if (calContent.classList.contains('active')) { calContent.classList.remove('active'); clockContent.style.opacity = '1'; btn.classList.remove('hidden'); clearTimeout(calendarTimeout); } 
