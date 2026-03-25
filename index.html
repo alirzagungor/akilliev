@@ -177,16 +177,13 @@
         .split-mini-card { background-color: rgba(15, 20, 35, 0.45); border-radius: 24px; border: 1px solid var(--glass-border); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); display: flex; flex-direction: column; justify-content: flex-start; padding: 12px 15px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); overflow: hidden; transition: transform 0.2s ease, border-color 1s ease; }
         .sm-card-header { font-size: 1.1vh; font-weight: 800; color: var(--text-secondary); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; flex-shrink: 0; }
         
-        .pharmacy-content { display: flex; align-items: center; gap: 10px; flex-grow: 1; min-height: 0; }
+        .pharmacy-content { display: flex; align-items: center; gap: 10px; flex-grow: 1; min-height: 0; overflow: hidden; }
         .pharmacy-icon { width: 3.5vh; height: 3.5vh; flex-shrink: 0; filter: drop-shadow(0 2px 4px rgba(231, 76, 60, 0.4)); }
         .pharmacy-icon svg { width: 100%; height: 100%; }
         
-        .pharmacy-name { font-size: 1.9vh; font-weight: 900; color: #e74c3c; line-height: 1.1; display: flex; flex-direction: column; justify-content: center; gap: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); word-break: break-word; max-width: 100%; }
-        .pharmacy-name .sub-text { font-size: 1.2vh; font-weight: 800; color: var(--text-secondary); text-shadow: none; letter-spacing: 1px;}
-
         .quake-content { display: flex; flex-direction: column; justify-content: center; flex-grow: 1; min-height: 0; }
         .quake-mag { font-size: 3.5vh; font-weight: 900; line-height: 1; text-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 8px; }
-        .quake-loc { font-size: 1.1vh; font-weight: 700; color: rgba(255,255,255,0.8); margin-top: 4px; display: -webkit-box; -line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; width: 100%; text-transform: uppercase; line-height: 1.3;}
+        .quake-loc { font-size: 1.1vh; font-weight: 700; color: rgba(255,255,255,0.8); margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; width: 100%; text-transform: uppercase; line-height: 1.3;}
         
         .mag-low { color: #2ecc71; } .mag-med { color: #f39c12; } .mag-high { color: #e74c3c; }
         .pulse-dot { width: 1.2vh; height: 1.2vh; border-radius: 50%; display: inline-block; flex-shrink: 0; }
@@ -492,9 +489,12 @@
             <div class="bottom-split-row">
                 <div class="split-mini-card">
                     <div class="sm-card-header">NÖBETÇİ ECZANE</div>
-                    <div class="pharmacy-content">
+                    <div class="pharmacy-content" style="overflow: hidden;">
                         <div class="pharmacy-icon"><svg viewBox="0 0 100 100"><rect x="5" y="5" width="90" height="90" fill="#ffffff" stroke="#e74c3c" stroke-width="10" rx="10"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-size="65" fill="#e74c3c">E</text></svg></div>
-                        <div class="pharmacy-name" id="pharmacy-name">BEKLENİYOR...</div>
+                        <div style="display: flex; flex-direction: column; justify-content: center; overflow: hidden; width: 100%;">
+                            <div id="pharmacy-name" style="font-size: 1.6vh; font-weight: 800; color: #e74c3c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">YÜKLENİYOR...</div>
+                            <div id="pharmacy-loc" style="font-size: 1.1vh; line-height: 1.3; opacity: 0.8; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-secondary);">Eczane adresi bekleniyor...</div>
+                        </div>
                     </div>
                 </div>
                 <div class="split-mini-card">
@@ -1133,55 +1133,67 @@ const stations = { slow:"https://listen.powerapp.com.tr/powerturkslow/mpeg/iceca
         }
 
         async function fetchPharmacyAndQuake() {
-            // 1. NÖBETÇİ ECZANE (RapidAPI - Volkan Y)
+            const apiKey = "6nEKJAGbchHEASTKvBOe6b:600tUILs9mL8QOiPNwvND5"; // apikey kelimesini kaldırdık
+            const pharmacyUrl = "https://api.collectapi.com/health/dutyPharmacy?ilce=Cinarcik&il=Yalova";
+
             try {
-                // Kodun en üstünde tanımlı olan RAPIDAPI_KEY'i kullanıyoruz.
-                const url = `https://turkey-pharmacy.p.rapidapi.com/pharmacy?city=Yalova&county=%C3%87%C4%B1narc%C4%B1k`;
-                
-                const res = await fetch(url, { 
+                const response = await fetch(pharmacyUrl, {
                     method: 'GET',
-                    headers: { 
-                        "x-rapidapi-key": RAPIDAPI_KEY,
-                        "x-rapidapi-host": "turkey-pharmacy.p.rapidapi.com"
+                    headers: {
+                        "content-type": "application/json",
+                        "authorization": `apikey ${apiKey}`
                     }
                 });
-                
-                const data = await res.json();
-                
-                // Volkan Y API'si verileri genelde data.data içinde döner
-                let eczaneListesi = data.data || data.result || [];
-                
-                if(eczaneListesi.length > 0) {
-                    let eczane = eczaneListesi[0];
-                    // API'den gelen isme göre Eczane adını temizleyip tasarıma oturtuyoruz
-                    let pName = (eczane.name || eczane.EczaneAdi || eczane.eczaneAdi || eczane.title || "BİLİNMEYEN").toUpperCase();
-                    let baseName = pName.replace(" ECZANESI", "").replace(" ECZANESİ", "").trim();
-                    document.getElementById('pharmacy-name').innerHTML = `${baseName}<span class="sub-text">ECZANESİ</span>`;
+
+                const data = await response.json();
+
+                if (data.success && data.result.length > 0) {
+                    const pharmacy = data.result[0];
+                    const nameEl = document.getElementById('pharmacy-name');
+                    const locEl = document.getElementById('pharmacy-loc');
+                    
+                    if (nameEl) nameEl.innerText = pharmacy.name;
+                    if (locEl) locEl.innerText = pharmacy.address;
                 } else {
-                    document.getElementById('pharmacy-name').innerHTML = `<span style="font-size:1.3vh; color:#FDB912;">ECZANE YOK</span>`;
+                    if (document.getElementById('pharmacy-name')) 
+                        document.getElementById('pharmacy-name').innerText = "NÖBETÇİ BULUNAMADI";
                 }
-            } catch(e) { 
-                document.getElementById('pharmacy-name').innerHTML = `<span style="font-size:1.3vh; color:#e74c3c;">BAĞLANTI HATASI</span>`; 
+            } catch (e) {
+                console.error("Eczane verisi çekilemedi:", e);
+                if (document.getElementById('pharmacy-name')) 
+                    document.getElementById('pharmacy-name').innerText = "BAĞLANTI HATASI";
             }
 
-            // 2. SON DEPREM (Kandilli - Ücretsiz ve Limitsiz)
             try {
-                const resQ = await fetch("https://api.orhanaydogdu.com.tr/deprem/kandilli/live");
-                const dataQ = await resQ.json();
-                if(dataQ.status && dataQ.result.length > 0) {
-                    let eq = dataQ.result[0], mag = parseFloat(eq.mag);
-                    document.getElementById('quake-mag-val').innerText = mag.toFixed(1);
-                    document.getElementById('quake-loc').innerText = eq.title.toLowerCase();
+                const qRes = await fetch("https://api.orhanaydogdu.com.tr/deprem/kandilli/live");
+                const qData = await qRes.json();
+                if(qData.status && qData.result.length > 0) {
+                    const lastQuake = qData.result[0];
+                    const mag = parseFloat(lastQuake.mag);
+                    
+                    const locEl = document.getElementById('quake-loc');
+                    const magValEl = document.getElementById('quake-mag-val');
+                    const dot = document.getElementById('quake-dot');
+                    const magText = document.getElementById('quake-mag');
 
-                    let dot = document.getElementById('quake-dot'), magText = document.getElementById('quake-mag');
-                    dot.className = "pulse-dot"; magText.className = "quake-mag";
+                    if(locEl) locEl.innerText = lastQuake.title.split('(')[0].trim().toLowerCase();
+                    if(magValEl) magValEl.innerText = mag.toFixed(1);
 
-                    if(mag < 3.0) { dot.classList.add('pulse-low'); magText.classList.add('mag-low'); } 
-                    else if (mag >= 3.0 && mag < 4.5) { dot.classList.add('pulse-med'); magText.classList.add('mag-med'); } 
-                    else { dot.classList.add('pulse-high'); magText.classList.add('mag-high'); }
+                    if(dot && magText) {
+                        dot.className = "pulse-dot"; // Reset
+                        magText.classList.remove('mag-low', 'mag-med', 'mag-high'); // Reset
+                        
+                        if(mag < 3.0) { dot.classList.add('pulse-low'); magText.classList.add('mag-low'); } 
+                        else if (mag >= 3.0 && mag < 4.5) { dot.classList.add('pulse-med'); magText.classList.add('mag-med'); } 
+                        else { dot.classList.add('pulse-high'); magText.classList.add('mag-high'); }
+                    }
                 }
-            } catch(e) { document.getElementById('quake-loc').innerText = "BAĞLANTI HATASI"; }
+            } catch(e) { 
+                if(document.getElementById('quake-loc')) 
+                    document.getElementById('quake-loc').innerText = "BAĞLANTI HATASI"; 
+            }
         }
+
         window.onload = function() {
             clockEl = document.getElementById('clock'); sleepClockEl = document.getElementById('sleep-clock'); dateEl = document.getElementById('date'); sleepDateEl = document.getElementById('sleep-date'); overlayEl = document.getElementById('sleep-overlay');
 
