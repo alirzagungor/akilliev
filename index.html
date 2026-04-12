@@ -939,6 +939,58 @@
         // Müzik ve Radyo Linkleri
         // Müzik ve Radyo Linkleri
 const stations = { slow:"https://listen.powerapp.com.tr/powerturkslow/mpeg/icecast.audio", pop:"https://listen.powerapp.com.tr/powerturk/mpeg/icecast.audio", joy:"https://playerservices.streamtheworld.com/api/livestream-redirect/JOY_TURK_SC" };
+        const WEBHOOK_BASE_URL = localStorage.getItem('bridge_base_url') || "http://127.0.0.1:8581";
+        const WEBHOOK_TOKEN = localStorage.getItem('bridge_token') || "";
+        const shortcutWebhookMap = {
+            SalonTavanAc: "salon-tavan/on", SalonTavanKapat: "salon-tavan/off",
+            SalonSehpaAc: "salon-sehpa/on", SalonSehpaKapat: "salon-sehpa/off",
+            SalonTVAc: "salon-tv/on", SalonTVKapat: "salon-tv/off",
+            YatakTavanAc: "yatak-tavan/on", YatakTavanKapat: "yatak-tavan/off",
+            YatakGeceAc: "yatak-gece/on", YatakGeceKapat: "yatak-gece/off",
+            CalismaTavanAc: "calisma-tavan/on", CalismaTavanKapat: "calisma-tavan/off",
+            CalismaMasaAc: "calisma-masa/on", CalismaMasaKapat: "calisma-masa/off",
+            MutfakTavanAc: "mutfak-tavan/on", MutfakTavanKapat: "mutfak-tavan/off",
+            MutfakTezgahAc: "mutfak-tezgah/on", MutfakTezgahKapat: "mutfak-tezgah/off",
+            KoridorGirisAc: "koridor-giris/on", KoridorGirisKapat: "koridor-giris/off",
+            KoridorAraAc: "koridor-ara/on", KoridorAraKapat: "koridor-ara/off",
+            BalkonTavanAc: "balkon-tavan/on", BalkonTavanKapat: "balkon-tavan/off",
+            OturmaTavanAc: "oturma-tavan/on", OturmaTavanKapat: "oturma-tavan/off"
+        };
+
+        function parseShortcutName(href) {
+            try {
+                const query = href.split('?')[1] || "";
+                const params = new URLSearchParams(query);
+                return params.get('name');
+            } catch (e) { return null; }
+        }
+
+        async function triggerBridgeControl(shortcutName, btnEl) {
+            const endpoint = shortcutWebhookMap[shortcutName];
+            if (!endpoint) return;
+            const oldLabel = btnEl.innerText;
+            btnEl.innerText = "...";
+            try {
+                const headers = { "Content-Type": "application/json" };
+                if (WEBHOOK_TOKEN) headers["Authorization"] = `Bearer ${WEBHOOK_TOKEN}`;
+                const response = await fetch(`${WEBHOOK_BASE_URL}/${endpoint}`, { method: "POST", headers });
+                btnEl.innerText = response.ok ? "OK" : "ERR";
+            } catch (e) {
+                btnEl.innerText = "ERR";
+            } finally {
+                setTimeout(() => { btnEl.innerText = oldLabel; }, 700);
+            }
+        }
+
+        function initBridgeButtons() {
+            document.querySelectorAll('.sh-btn[href^="shortcuts://"]').forEach(btn => {
+                btn.addEventListener('click', async (evt) => {
+                    evt.preventDefault();
+                    const shortcutName = parseShortcutName(btn.getAttribute('href') || "");
+                    if (shortcutName) await triggerBridgeControl(shortcutName, btn);
+                });
+            });
+        }
         const player = document.getElementById('radioPlayer');
         let currentKey = null, isPlaying = false, calendarTimeout, manualWake = false, isAnalogMode = false, isManualLightMode = true, clockEl, sleepClockEl, dateEl, sleepDateEl, overlayEl;
 
@@ -1276,6 +1328,7 @@ const stations = { slow:"https://listen.powerapp.com.tr/powerturkslow/mpeg/iceca
 
         window.onload = function() {
             clockEl = document.getElementById('clock'); sleepClockEl = document.getElementById('sleep-clock'); dateEl = document.getElementById('date'); sleepDateEl = document.getElementById('sleep-date'); overlayEl = document.getElementById('sleep-overlay');
+            initBridgeButtons();
 
             updateDynamicTheme(); updateClock();
             getWeather(); setInterval(getWeather, 600000);
