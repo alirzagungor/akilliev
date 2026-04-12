@@ -634,13 +634,25 @@
     </div>
 
     <script>
-        const RAPIDAPI_KEY = "758f4eb785msh9bd6e9a3c14bf5ep1f9769jsn35566a032b00";
-        const GS_TEAM_ID = 3061;
-        const API_HOST = "sofascore.p.rapidapi.com";
-        let liveMatchId = null, liveInterval = null, isHalftimeSleep = false;
-        
-        const teamColors = { 8695: "#00005C", 10188: "#000000", 9752: "#800000", 1933: "#FF6600", 8622: "#005A32", 9750: "#FF0000", 2088: "#FF0000", 4685: "#00005C", 4678: "#FF6600", 4681: "#660099" };
+            const RAPIDAPI_KEY = "ce927236fcmsh6088a65f409df9cp17fb4ejsnfaa7e8935c67";
+            const GS_TEAM_ID = 3061;
+            const API_HOST = "sofascore.p.rapidapi.com";
+            let liveMatchId = null
+              , liveInterval = null
+              , isHalftimeSleep = false;
 
+            const teamColors = {
+                8695: "#00005C",
+                10188: "#000000",
+                9752: "#800000",
+                1933: "#FF6600",
+                8622: "#005A32",
+                9750: "#FF0000",
+                2088: "#FF0000",
+                4685: "#00005C",
+                4678: "#FF6600",
+                4681: "#660099"
+        };
         function hexToRgba(hex, alpha) {
             let c;
             if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
@@ -654,16 +666,80 @@
 
         function getTeamLogo(teamId) {
             const fotmobMap = {
-                3061: 8637, 3052: 8695, 3014: 10188, 3001: 9752, 3280: 6953, 
-                3010: 9756, 3006: 9777, 3037: 112224, 3018: 8694, 3030: 9750, 
-                3039: 10190, 3004: 8693, 3009: 8697, 3031: 10189, 3105: 20222, 
-                3007: 8698, 3135: 10168, 3012: 9936, 48943: 130889, 3016: 8692, 
-                2829: 8633, 17: 8456, 2672: 9823, 2817: 8634, 42: 9825, 1644: 9847, 
-                2697: 8636, 2687: 9885, 44: 8650, 2681: 8178, 2673: 9789, 2836: 9906, 
-                2692: 8564, 2984: 9768, 2953: 8611, 2952: 8593, 40: 8586,
-                33: 8586, 35: 8650, 2950: 8271, 1634: 8322, 3254: 10170, 2816: 8654, 
-                2824: 8548, 2828: 8636
+                3061: 8637,
+                    // Galatasaray
+                    3052: 8695,
+                    // Fenerbahçe
+                    3014: 10188,
+                    // Beşiktaş
+                    3001: 9752,
+                    // Trabzonspor
+                    3010: 1933,
+                    // Başakşehir
+                    3006: 4685,
+                    // Kasımpaşa
+                    3325: 4678,
+                    // Alanyaspor
+                    3018: 2166,
+                    // Çaykur Rizespor
+                    3030: 9750,
+                    // Samsunspor
+                    3280: 6953,
+                    // Gaziantep FK
+                    3012: 8622,
+                    // Konyaspor
+                    3016: 8692,
+                    // Antalyaspor
+                    3031: 10189,
+                    // Kayserispor
+                    3013: 9783,
+                    // Sivasspor
+                    3008: 8696,
+                    // Adana Demirspor
+                    3011: 9782,
+                    // Hatayspor
+                    3004: 1925,
+                    // Göztepe
+                    3065: 1569,
+                    // Kocaelispor (FIXED ID)
+                    3009: 7800,
+                    // Gençlerbirliği
+                    3105: 162961,
+                    // Fatih Karagümrük
+                    3015: 20223,
+                    // Pendikspor
+                    3005: 9749,
+                    // MKE Ankaragücü
+                    3019: 9751,
+                    // İstanbulspor
+                    3324: 4681,
+                    // Eyüpspor
+                    3135: 10168,
+                    // Bandırmaspor
+                    3039: 10190,
+                    // Bodrum FK
+                    48943: 130889,
+                    // Iğdır FK
+                    2829: 8633,
+                    2817: 8634,
+                    2836: 9906,
+                    2672: 9823,
+                    2673: 9789,
+                    17: 8456,
+                    35: 8654,
+                    44: 8650,
+                    42: 9825,
+                    38: 8455,
+                    33: 8678,
+                    1644: 9847,
+                    2687: 9885,
+                    2697: 8636,
+                    2692: 8564,
+                    2681: 8178,
+                    2953: 8593,
+                    2952: 8640
             };
+            
             if(fotmobMap[teamId]) return `https://images.fotmob.com/image_resources/logo/teamlogo/${fotmobMap[teamId]}.png`;
             return `https://api.sofascore.com/api/v1/team/${teamId}/image`;
         }
@@ -673,7 +749,11 @@
         function setupMidnightCron() {
             const now = new Date(), tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
             tomorrow.setHours(0, 1, 0, 0); 
-            setTimeout(() => { initSportsDashboard(); setupMidnightCron(); }, tomorrow - now);
+            setTimeout(() => { 
+                initSportsDashboard(); 
+                setupMidnightCron(); 
+            }
+            , tomorrow - now);
         }
 
         async function initSportsDashboard() {
